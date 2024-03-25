@@ -14,6 +14,9 @@ public class BluffUI extends JFrame {
     private JPanel game3PPanel;
     private JPanel deckPanel;
     private JLabel deckLabel;
+    private JPanel opponentPanel;
+    private JPanel opponentCardPanel;
+    private JLabel bluffLabel;
     private int cardIconHeight = 70;
     private int cardIconWidth = 53;
     private String valToCheck = "K";
@@ -142,6 +145,22 @@ public class BluffUI extends JFrame {
     // TEMP REMOVE LATER (to test out elements in deck and updating of num of cards)
     ArrayList<Card> deck = new ArrayList<>();
 
+    
+    private void repaintOpponentPanel(){
+        opponentCardPanel.removeAll();
+
+        ArrayList<Card> opponentCards = getCurrentPlayerCards("P2");
+        for (Card card : opponentCards) {
+            String imagePath = "./cards/blank.png";
+            ImageIcon icon = new ImageIcon(imagePath);
+            JLabel cardLabel = new JLabel(icon);
+            cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
+            opponentCardPanel.add(cardLabel);
+        }
+        opponentPanel.revalidate();
+        opponentPanel.repaint();
+    }
+
     // 2P screen 
     private void setupGame2PPanel() {
         // create a new panel for the 2p screen
@@ -153,7 +172,7 @@ public class BluffUI extends JFrame {
         ImageIcon deckIcon = new ImageIcon("./cards/deck.png");
         JLabel deckPic = new JLabel(deckIcon);
         deckLabel = new JLabel(deck.size() + " Cards");
-
+        bluffLabel = new JLabel("");
         // Create a panel for the deck image and label
         JPanel deckPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         deckPanel.setBackground(new Color(46, 163, 108));
@@ -161,6 +180,7 @@ public class BluffUI extends JFrame {
         // Add the deck image and label to the deckPanel
         deckPanel.add(deckPic);
         deckPanel.add(deckLabel);
+        deckPanel.add(bluffLabel);
 
         // Add the deckPanel to the center of the game2PPanel
         game2PPanel.add(deckPanel, BorderLayout.CENTER);  
@@ -199,16 +219,15 @@ public class BluffUI extends JFrame {
         game2PPanel.add(currentPlayerPanel, BorderLayout.SOUTH);
 
         // Opponent's Panel:
-        JPanel opponentPanel = new JPanel(new BorderLayout());
+        opponentPanel = new JPanel(new BorderLayout());
         JLabel opponentLabel = new JLabel("P2's Cards", SwingConstants.CENTER);
         // show opponent at the top of the screen
         opponentPanel.add(opponentLabel, BorderLayout.NORTH);
 
         // display opponent's cards
-        JPanel opponentCardPanel = new JPanel(new GridLayout(0, 18, 0, 3)); 
-        // get the num of their cards
+        opponentCardPanel = new JPanel(new GridLayout(0, 18, 0, 3)); 
         ArrayList<Card> nextOpponentCards = getCurrentPlayerCards("P2");
-        
+    
         // display them as face down
         for (int i = 0; i < nextOpponentCards.size(); i++) {
             String imagePath = "./cards/blank.png";
@@ -263,17 +282,7 @@ public class BluffUI extends JFrame {
                 currentPlayerPanel.repaint();
                 
                 // Repaint the opponent's cards panel
-                opponentCardPanel.removeAll();
-                ArrayList<Card> opponentCards = getCurrentPlayerCards("P2");
-                for (Card card : opponentCards) {
-                    String imagePath = "./cards/blank.png";
-                    ImageIcon icon = new ImageIcon(imagePath);
-                    JLabel cardLabel = new JLabel(icon);
-                    cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
-                    opponentCardPanel.add(cardLabel);
-                }
-                opponentPanel.revalidate();
-                opponentPanel.repaint();
+                repaintOpponentPanel();
             }
             // if no cards selected
             else {
@@ -357,19 +366,16 @@ public class BluffUI extends JFrame {
             // if previous person is NOt bluffing, called wrongly
             if (!checkRecentCards()){
                 // Label to be updated, now it's dummy text just to show that it works. TO DO: clear the text
-                JLabel wrongJLabel = new JLabel("Wrong!");
-                game2PPanel.add(wrongJLabel, BorderLayout.CENTER);
-                game2PPanel.revalidate();
-                game2PPanel.repaint();
+                bluffLabel.setText("P2 was not bluffing!");
+                
             } 
             // else if previous person WAS bluffing, called correctly
             else {
-                JLabel rightLabel = new JLabel("Right!");
-                game2PPanel.add(rightLabel, BorderLayout.CENTER);
-                game2PPanel.revalidate();
-                game2PPanel.repaint();
+                bluffLabel.setText("P2 was bluffing!");
             }
             advanceTurn();
+            repaintOpponentPanel();
+            bluffLabel.setText("");
         }
     };
 
