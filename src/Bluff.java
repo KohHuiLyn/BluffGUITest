@@ -23,6 +23,8 @@ public class Bluff extends JFrame {
         initializeComponents();
         setupCardLayout();
         setupStartPanel();
+        // REMOVE LATER
+        initialiseCards();
         setupGame2PPanel();
         setupGame3PPanel();
         setVisible(true);
@@ -150,46 +152,38 @@ public class Bluff extends JFrame {
     ArrayList<Card> p1 = new ArrayList<>();
     ArrayList<Card> p2 = new ArrayList<>();
 
-    private ArrayList<Card> getCurrentPlayerCards(String player) {
+    private void initialiseCards() {
         // ArrayList<Card> p1 = new ArrayList<>();
         p1.add(new Card("C", "A"));
         p1.add(new Card("S", "2"));
         p1.add(new Card("D", "3"));
         p1.add(new Card("H", "4"));
         p1.add(new Card("C", "5"));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("C", "Q" ));
-        // p1.add(new Card("D", "Q" ));
-        // p1.add(new Card("C", "Q" ));
-        // p1.add(new Card("S", "2" ));
-        // p1.add(new Card("C", "K" ));
-        // p1.add(new Card("C", "K" ));
-        // p1.add(new Card("C", "K" ));
-        // p1.add(new Card("C", "K" ));
-        // p1.add(new Card("C", "K" ));
-        // p1.add(new Card("C", "K" ));
-        // p1.add(new Card("D", "K" ));
-
         // ArrayList<Card> p2 = new ArrayList<>();
         p2.add(new Card("S", "2"));
         p2.add(new Card("C", "Q"));
         p2.add(new Card("D", "Q"));
         p2.add(new Card("C", "Q"));
         p2.add(new Card("S", "2"));
-        p2.add(new Card("C", "K"));
-        p2.add(new Card("C", "K"));
-        p2.add(new Card("C", "K"));
-        p2.add(new Card("C", "K"));
-        p2.add(new Card("C", "K"));
-        p2.add(new Card("C", "K"));
-        p2.add(new Card("D", "K"));
+        // p2.add(new Card("C", "K"));
+        // p2.add(new Card("C", "K"));
+        // p2.add(new Card("C", "K"));
+        // p2.add(new Card("C", "K"));
+        // p2.add(new Card("C", "K"));
+        // p2.add(new Card("C", "K"));
+        // p2.add(new Card("D", "K"));
 
-        return player.equals("P2") ? p2 : p1;
+    }
+    
+    //  TEMP CODE will replace
+    private ArrayList<Card> getCurrentPlayerCards(String player){
+        if (player.equals("P1")){
+            return p1;
+        }
+        if (player.equals("P2")){
+            return p2;
+        }
+        return null;
     }
 
     ArrayList<Card> selectedCards = new ArrayList<>();
@@ -219,6 +213,8 @@ public class Bluff extends JFrame {
         bluffButton.addActionListener(e -> {
 
         });
+
+        // PLAY CARDS btn
         JButton playHandButton = new JButton("Play Selected Cards!");
         currentPlayerPanel.add(playHandButton, BorderLayout.NORTH); // Add the button to the left side
         currentPlayerPanel.add(bluffButton, BorderLayout.NORTH); // Add the button to the left side
@@ -260,27 +256,17 @@ public class Bluff extends JFrame {
         }
         currentPlayerPanel.add(playerCardsPanel, BorderLayout.CENTER);
 
+        // ================ PLAY HAND BUTTON ================
         playHandButton.addActionListener(e -> {
             // Remove selected cards from the player's hand
             for (Card card : selectedCards) {
                 p1.remove(card);
                 currentPlayerCards.remove(card);
             }
-
-            // Remove duplicates from the currentPlayerCards list
-            Set<Card> uniqueCards = new HashSet<>(currentPlayerCards);
-            currentPlayerCards.clear();
-            currentPlayerCards.addAll(uniqueCards);
-
             // Clear the selected cards list
             selectedCards.clear();
 
-            // Print currentPlayerCards after removing selected cards
-            System.out.println("After removing selected cards:");
-            for (Card card : currentPlayerCards) {
-                System.out.println(card);
-            }
-
+            // REDRAW current player panel
             // Update the currentPlayerPanel with the updated player's hand
             currentPlayerPanel.remove(playerCardsPanel); // Remove the old playerCardsPanel
             playerCardsPanel.removeAll(); // Clear the old cards from the playerCardsPanel
@@ -291,13 +277,12 @@ public class Bluff extends JFrame {
                 String imagePath = card.getImgPath();
                 ImageIcon icon = new ImageIcon(imagePath);
                 JButton cardLabel = new JButton(icon);
-
-                // Add action listener to the card button
-                cardLabel.addActionListener(cardListener); // Assuming cardListener is defined elsewhere
+                
+                cardLabel.addActionListener(cardListener); 
 
                 // Set the size of the label to match the size of the ImageIcon
                 cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
-
+                cardMap.put(cardLabel, card);
                 // Add the card button to the playerCardsPanel
                 playerCardsPanel.add(cardLabel);
             }
