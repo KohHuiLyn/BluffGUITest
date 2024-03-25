@@ -12,6 +12,8 @@ public class BluffUI extends JFrame {
     private JPanel startPanel;
     private JPanel game2PPanel;
     private JPanel game3PPanel;
+    private JPanel deckPanel;
+    private JLabel deckLabel;
     private int cardIconHeight = 70;
     private int cardIconWidth = 53;
     private String valToCheck = "K";
@@ -136,6 +138,10 @@ public class BluffUI extends JFrame {
         cardPanel.add(startPanel, "start");
     }
 
+
+    // TEMP REMOVE LATER (to test out elements in deck and updating of num of cards)
+    ArrayList<Card> deck = new ArrayList<>();
+
     // 2P screen 
     private void setupGame2PPanel() {
         // create a new panel for the 2p screen
@@ -145,8 +151,19 @@ public class BluffUI extends JFrame {
 
         // add image of card deck in middle of screen (might change later on :o)
         ImageIcon deckIcon = new ImageIcon("./cards/deck.png");
-        JLabel deckLabel = new JLabel(deckIcon);
-        game2PPanel.add(deckLabel, BorderLayout.CENTER);
+        JLabel deckPic = new JLabel(deckIcon);
+        deckLabel = new JLabel(deck.size() + " Cards");
+
+        // Create a panel for the deck image and label
+        JPanel deckPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        deckPanel.setBackground(new Color(46, 163, 108));
+
+        // Add the deck image and label to the deckPanel
+        deckPanel.add(deckPic);
+        deckPanel.add(deckLabel);
+
+        // Add the deckPanel to the center of the game2PPanel
+        game2PPanel.add(deckPanel, BorderLayout.CENTER);  
 
         // Current player = current player now (their cards displayed at the btm)
         // flow layout is to centralise elements 
@@ -208,50 +225,61 @@ public class BluffUI extends JFrame {
 
         // Play hand button
         playHandButton.addActionListener(e -> {
-            // when clicked, clear the recent cards (cards that were just played)
-            recentCards.clear();
-            // for every card that the player selects and plays
-            for (Card card : selectedCards) {
-                // add it to the recently played cards
-                recentCards.add(card);
-                // remove it from p1's card hand
-                p1.remove(card);
+            if (selectedCards.size() > 0){
+                // when clicked, clear the recent cards (cards that were just played)
+                recentCards.clear();
+                // for every card that the player selects and plays
+                for (Card card : selectedCards) {
+                    // add to total deck
+                    deck.add(card);
+                    // add it to the recently played cards
+                    recentCards.add(card);
+                    // remove it from p1's card hand
+                    p1.remove(card);
+                    
+                }
+                // clear the selected cards to reset it
+                selectedCards.clear();
+
+                // change deck label
+                deckLabel.setText(deck.size()+" Cards");
+                // remove all the cards from current player panel in order to redraw them
+                currentPlayerPanel.remove(playerCardsPanel);
+                playerCardsPanel.removeAll();
+                advanceTurn();
+
+                // redrawing cards into cardspanel
+                ArrayList<Card> nextPlayerCards = getCurrentPlayerCards("P1");
                 
+                for (Card card : nextPlayerCards) {
+                    repaintCardPanel(card, playerCardsPanel);
+                }
+
+                // add back the playcardspanel to the center of it
+                currentPlayerPanel.add(playerCardsPanel, BorderLayout.CENTER);
+
+                // repaint current player panel
+                currentPlayerPanel.revalidate();
+                currentPlayerPanel.repaint();
+                
+                // Repaint the opponent's cards panel
+                opponentCardPanel.removeAll();
+                ArrayList<Card> opponentCards = getCurrentPlayerCards("P2");
+                for (Card card : opponentCards) {
+                    String imagePath = "./cards/blank.png";
+                    ImageIcon icon = new ImageIcon(imagePath);
+                    JLabel cardLabel = new JLabel(icon);
+                    cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
+                    opponentCardPanel.add(cardLabel);
+                }
+                opponentPanel.revalidate();
+                opponentPanel.repaint();
             }
-            // clear the selected cards to reset it
-            selectedCards.clear();
-
-            // remove all the cards from current player panel in order to redraw them
-            currentPlayerPanel.remove(playerCardsPanel);
-            playerCardsPanel.removeAll();
-            advanceTurn();
-
-            // redrawing cards into cardspanel
-            ArrayList<Card> nextPlayerCards = getCurrentPlayerCards("P1");
-            
-            for (Card card : nextPlayerCards) {
-                repaintCardPanel(card, playerCardsPanel);
+            // if no cards selected
+            else {
+                JOptionPane.showMessageDialog(null, "Choose at least 1 card", "OI", JOptionPane.PLAIN_MESSAGE);
             }
 
-            // add back the playcardspanel to the center of it
-            currentPlayerPanel.add(playerCardsPanel, BorderLayout.CENTER);
-
-            // repaint current player panel
-            currentPlayerPanel.revalidate();
-            currentPlayerPanel.repaint();
-            
-            // Repaint the opponent's cards panel
-            opponentCardPanel.removeAll();
-            ArrayList<Card> opponentCards = getCurrentPlayerCards("P2");
-            for (Card card : opponentCards) {
-                String imagePath = "./cards/blank.png";
-                ImageIcon icon = new ImageIcon(imagePath);
-                JLabel cardLabel = new JLabel(icon);
-                cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
-                opponentCardPanel.add(cardLabel);
-            }
-            opponentPanel.revalidate();
-            opponentPanel.repaint();
         });
         cardPanel.add(game2PPanel, "2P");
 
@@ -307,10 +335,17 @@ public class BluffUI extends JFrame {
     }
     
 
+    // TEMP REMOVE LATER
+    private void opponentMove(){
+        deck.add(p2.get(1));
+        p2.remove(1);
+        // change deck label
+        deckLabel.setText(deck.size()+" Cards");
+    }
     // TEMP REMOVELATER 
     private void advanceTurn() {
         // REMOVE LATER, to check if can display opponent's cards
-        p2.remove(1);
+        opponentMove();
         turn++; 
     }
 
