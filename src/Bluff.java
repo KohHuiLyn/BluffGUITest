@@ -186,6 +186,38 @@ public class Bluff extends JFrame {
         return null;
     }
 
+        // reuseable card listener=====
+        ActionListener cardListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JButton clickedButton = (JButton) e.getSource(); // Get the clicked button
+                // Retrieve the Card object associated with the clicked button
+                Card card = cardMap.get(clickedButton);
+                if (card.getSelected()) {
+                    selectedCards.remove(card);
+                    clickedButton.setBorder(null);
+                } else {
+                    // Add the clicked card to the selectedCards array
+                    selectedCards.add(card);
+                    clickedButton.setBorder(BorderFactory.createLineBorder(Color.RED)); // For example, change border color to red
+                }
+                card.selectOrDeselect();
+            }
+        };
+    private void redrawCards(Card card, JPanel playerCardsPanel){
+        // Create the JButton with the updated card image
+        String imagePath = card.getImgPath();
+        ImageIcon icon = new ImageIcon(imagePath);
+        JButton cardLabel = new JButton(icon);
+        
+        cardLabel.addActionListener(cardListener); 
+
+        // Set the size of the label to match the size of the ImageIcon
+        cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
+        cardMap.put(cardLabel, card);
+        // Add the card button to the playerCardsPanel
+        playerCardsPanel.add(cardLabel);
+    }
     ArrayList<Card> selectedCards = new ArrayList<>();
     // Define a Map to store the association between JButton and Card
     Map<JButton, Card> cardMap = new HashMap<>();
@@ -214,7 +246,7 @@ public class Bluff extends JFrame {
 
         });
 
-        // PLAY CARDS btn
+        // PLAY CARDS btn, CURRENT PLAYER CARDS PANEL =====
         JButton playHandButton = new JButton("Play Selected Cards!");
         currentPlayerPanel.add(playHandButton, BorderLayout.NORTH); // Add the button to the left side
         currentPlayerPanel.add(bluffButton, BorderLayout.NORTH); // Add the button to the left side
@@ -223,36 +255,8 @@ public class Bluff extends JFrame {
         JPanel playerCardsPanel = new JPanel(new GridLayout(0, 18, 0, 3)); // 5 columns with gaps
         ArrayList<Card> currentPlayerCards = getCurrentPlayerCards("P1"); // Retrieve player's cards
 
-        // reuseable card listener=====
-        ActionListener cardListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JButton clickedButton = (JButton) e.getSource(); // Get the clicked button
-                // Retrieve the Card object associated with the clicked button
-                Card card = cardMap.get(clickedButton);
-                if (card.getSelected()) {
-                    selectedCards.remove(card);
-                    clickedButton.setBorder(null);
-                } else {
-                    // Add the clicked card to the selectedCards array
-                    selectedCards.add(card);
-                    clickedButton.setBorder(BorderFactory.createLineBorder(Color.RED)); // For example, change border color to red
-                }
-                card.selectOrDeselect();
-            }
-        };
         for (Card card : currentPlayerCards) {
-            String imagePath = card.getImgPath();
-            ImageIcon icon = new ImageIcon(imagePath);
-            JButton cardLabel = new JButton(icon);
-
-            // select or deselect cards to play
-            cardLabel.addActionListener(cardListener);
-            // Set the size of the label to match the size of the ImageIcon
-            cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
-            playerCardsPanel.add(cardLabel);
-            // Associate the JButton with the Card in the map
-            cardMap.put(cardLabel, card);
+            redrawCards(card, playerCardsPanel);
         }
         currentPlayerPanel.add(playerCardsPanel, BorderLayout.CENTER);
 
@@ -273,18 +277,7 @@ public class Bluff extends JFrame {
 
             // Add the updated cards to the playerCardsPanel
             for (Card card : currentPlayerCards) {
-                // Create the JButton with the updated card image
-                String imagePath = card.getImgPath();
-                ImageIcon icon = new ImageIcon(imagePath);
-                JButton cardLabel = new JButton(icon);
-                
-                cardLabel.addActionListener(cardListener); 
-
-                // Set the size of the label to match the size of the ImageIcon
-                cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
-                cardMap.put(cardLabel, card);
-                // Add the card button to the playerCardsPanel
-                playerCardsPanel.add(cardLabel);
+                redrawCards(card, playerCardsPanel);
             }
 
             // Add the updated playerCardsPanel back to the currentPlayerPanel
