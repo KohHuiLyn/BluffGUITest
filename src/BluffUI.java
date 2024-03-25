@@ -126,20 +126,7 @@ public class BluffUI extends JFrame {
         currentPlayerPanel.add(currentPlayerLabel, BorderLayout.NORTH);
 
         JButton bluffButton = new JButton("Call Bluff!");
-        bluffButton.addActionListener(e -> {
-            if (!checkRecentCards()){
-                JLabel wrongJLabel = new JLabel("Wrong!");
-                game2PPanel.add(wrongJLabel, BorderLayout.CENTER);
-                game2PPanel.revalidate();
-                game2PPanel.repaint();
-            } else {
-                JLabel rightLabel = new JLabel("Right!");
-                game2PPanel.add(rightLabel, BorderLayout.CENTER);
-                game2PPanel.revalidate();
-                game2PPanel.repaint();
-            }
-            advanceTurn();
-        });
+        bluffButton.addActionListener(bluffListener);
 
         JButton playHandButton = new JButton("Play Selected Cards!");
         currentPlayerPanel.add(playHandButton, BorderLayout.NORTH); 
@@ -160,9 +147,9 @@ public class BluffUI extends JFrame {
         opponentPanel.add(opponentLabel, BorderLayout.NORTH);
 
         JPanel opponentCardPanel = new JPanel(new GridLayout(0, 18, 0, 3)); 
-        ArrayList<Card> opponentCards = getCurrentPlayerCards("P2");
+        ArrayList<Card> nextOpponentCards = getCurrentPlayerCards(getNextPlayer());
         
-        for (int i = 0; i < opponentCards.size(); i++) {
+        for (int i = 0; i < nextOpponentCards.size(); i++) {
             String imagePath = "./cards/blank.png";
             ImageIcon icon = new ImageIcon(imagePath);
             JLabel cardLabel = new JLabel(icon);
@@ -195,6 +182,19 @@ public class BluffUI extends JFrame {
 
             currentPlayerPanel.revalidate();
             currentPlayerPanel.repaint();
+            
+            // Repaint the opponent's cards panel
+            opponentCardPanel.removeAll();
+            ArrayList<Card> opponentCards = getCurrentPlayerCards(getNextPlayer());
+            for (Card card : opponentCards) {
+                String imagePath = "./cards/blank.png";
+                ImageIcon icon = new ImageIcon(imagePath);
+                JLabel cardLabel = new JLabel(icon);
+                cardLabel.setPreferredSize(new Dimension(cardIconWidth, cardIconHeight));
+                opponentCardPanel.add(cardLabel);
+            }
+            opponentPanel.revalidate();
+            opponentPanel.repaint();
         });
         cardPanel.add(game2PPanel, "2P");
 
@@ -236,12 +236,36 @@ public class BluffUI extends JFrame {
         return players.get(turn % players.size()); 
     }
 
+    private String getNextPlayer() {
+        return players.get((turn+1) % players.size()); 
+    }
+    
+
     // TEMP REMOVELATER 
     private void advanceTurn() {
         turn++; 
     }
 
-    // TEMP REMOVELATER 
+    // BLUFF button logic
+    private final ActionListener bluffListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!checkRecentCards()){
+                JLabel wrongJLabel = new JLabel("Wrong!");
+                game2PPanel.add(wrongJLabel, BorderLayout.CENTER);
+                game2PPanel.revalidate();
+                game2PPanel.repaint();
+            } else {
+                JLabel rightLabel = new JLabel("Right!");
+                game2PPanel.add(rightLabel, BorderLayout.CENTER);
+                game2PPanel.revalidate();
+                game2PPanel.repaint();
+            }
+            advanceTurn();
+        }
+    };
+
+    // TEMP REMOVE LATER 
     private boolean checkRecentCards() {
         for (Card card : recentCards){
             if (!card.value.equals(valToCheck)){
@@ -262,6 +286,7 @@ public class BluffUI extends JFrame {
         return null;
     }
 
+    // CURRENT PLAYER'S CARDS
     private final ActionListener cardListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
